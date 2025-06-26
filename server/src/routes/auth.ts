@@ -1,6 +1,6 @@
 console.log('Auth routes loaded');
 import express from 'express';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { auth } from '../middleware/auth';
@@ -18,7 +18,7 @@ const TOKEN_EXPIRATION = '24h'; // Increased from 1h to 24h
 // Register a new user
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name } = req.body as { email: string; password: string; name: string };
 
     // Validate input
     if (!email || !password || !name) {
@@ -80,7 +80,7 @@ router.post('/register-admin', auth, async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Not authorized to create admin accounts' });
     }
 
-    const { email, password } = req.body;
+    const { email, password } = req.body as { email: string; password: string };
 
     // Validate input
     if (!email || !password) {
@@ -124,7 +124,7 @@ router.post('/register-admin', auth, async (req: AuthRequest, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body as { email: string; password: string };
 
     // Validate input
     if (!email || !password) {
@@ -188,9 +188,9 @@ router.get('/me', auth, async (req: AuthRequest, res) => {
 });
 
 // Update user profile
-router.patch('/me', auth, async (req, res) => {
+router.patch('/me', auth, async (req: AuthRequest, res) => {
   try {
-    const updates = {};
+    const updates: Partial<IUser> = {};
     if (req.body.name !== undefined) updates.name = req.body.name;
     if (req.body.phone !== undefined) updates.phone = req.body.phone;
     if (req.body.profilePic !== undefined) updates.profilePic = req.body.profilePic;
@@ -203,7 +203,7 @@ router.patch('/me', auth, async (req, res) => {
 });
 
 // Reset password
-router.post('/reset-password-auth', auth, async (req, res) => {
+router.post('/reset-password-auth', auth, async (req: AuthRequest, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
@@ -225,7 +225,7 @@ router.post('/reset-password-auth', auth, async (req, res) => {
 
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
+  const { email } = req.body as { email: string };
   if (!email) return res.status(400).json({ error: 'Email is required' });
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ error: 'No user with that email' });
@@ -233,10 +233,11 @@ router.post('/forgot-password', async (req, res) => {
   // Generate token
   const token = crypto.randomBytes(32).toString('hex');
   user.resetPasswordToken = token;
-  user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+  user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
   await user.save();
 
   // Send email (configure transporter as needed)
+  // Requires EMAIL_USER, EMAIL_PASS, and optionally FRONTEND_URL in your environment variables
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
