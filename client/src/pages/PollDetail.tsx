@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PollDetail: React.FC = () => {
