@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neutral-50 text-neutral-900 font-sans transition-colors duration-300;
+    font-family: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+    /* For dark mode, use className="dark:bg-gray-900 dark:text-gray-100" in your root JSX element */
+    @apply min-h-screen;
+    background: radial-gradient(ellipse at top left, #fda2ff 0%, #b97bff 100%);
+    transition: background 0.5s;
+    position: relative;
+  }
+  .dark body {
+    @apply bg-neutral-900 text-neutral-100;
+    @apply min-h-screen;
+    background: radial-gradient(ellipse at top right, #2a0059 0%, #1a0061 100%);
+    transition: background 0.5s;
+  }
+}
+
+@layer components {
+  /* Base button styles that can be used with @apply */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  /* 
+    For primary buttons, use in JSX:
+    className="btn bg-primary-500 text-white hover:bg-primary-600"
+  */
+  .btn-primary {
+    @apply text-white;
+  }
+  
+  /* 
+    For secondary buttons, use in JSX:
+    className="btn bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+  */
+  .btn-secondary {
+    @apply text-gray-800;
+  }
+  
+  /* 
+    For inputs, use in JSX:
+    className="input focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700"
+  */
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:border-transparent;
+  }
+  
+  /* 
+    For cards, use in JSX:
+    className="card dark:bg-gray-800"
+  */
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6;
+  }
+}
+
+@keyframes gridMove {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 80px 80px, 80px 80px; }
+}
+html::before, body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='20' height='20' fill='none'/%3E%3Cpath d='M0 0H20V20' stroke='%23b97bff' stroke-width='0.5'/%3E%3Cpath d='M0 20V0H20' stroke='%23b97bff' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.10;
+  background-size: 20px 20px;
+  animation: gridMove 30s linear infinite;
+}
+.dark html::before, .dark body::before {
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='20' height='20' fill='none'/%3E%3Cpath d='M0 0H20V20' stroke='%23ffeeb2' stroke-width='0.5'/%3E%3Cpath d='M0 20V0H20' stroke='%23ffeeb2' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.13;
+  background-size: 20px 20px;
+  animation: gridMove 30s linear infinite;
+} 
