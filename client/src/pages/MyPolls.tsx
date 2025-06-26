@@ -70,7 +70,7 @@ const MyPolls: React.FC = () => {
             // Build the shareable link
             const pollLink = poll.isPublic
               ? `${window.location.origin}/poll/${poll._id}`
-              : `${window.location.origin}/poll/${poll._id}${poll.accessCode ? `?accessCode=${encodeURIComponent(poll.accessCode)}` : ''}`;
+              : `${window.location.origin}/poll/${poll._id}${poll.accessCode ? `?accessCode=${encodeURIComponent(poll.accessCode || '')}` : ''}`;
             return (
               <div key={poll._id} className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
                 <Link
@@ -101,12 +101,12 @@ const MyPolls: React.FC = () => {
                     <p>Expires: {new Date(poll.expiresAt).toLocaleString()}</p>
                     {!poll.isPublic && poll.accessCode && (
                       <p className="mt-1 text-xs text-blue-600 dark:text-blue-400 flex items-center">
-                        Access Code: <span className="font-mono select-all mr-2">{poll.accessCode}</span>
+                        Access Code: <span className="font-mono select-all mr-2">{poll.accessCode || ''}</span>
                         <button
                           className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-xs rounded hover:bg-blue-200 dark:hover:bg-blue-800 focus:outline-none"
                           onClick={async (e) => {
                             e.preventDefault();
-                            await navigator.clipboard.writeText(poll.accessCode);
+                            await navigator.clipboard.writeText(poll.accessCode || '');
                             setCopiedId(`code-${poll._id}`);
                             setTimeout(() => setCopiedId(null), 1200);
                           }}

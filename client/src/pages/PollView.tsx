@@ -29,7 +29,6 @@ const PollView: React.FC = () => {
   const navigate = useNavigate();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [hasVoted, setHasVoted] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,10 +42,8 @@ const PollView: React.FC = () => {
         const data = await pollApi.getPoll(id);
         setPoll(data);
         if (user && data.voters && Array.isArray(data.voters)) {
-          setHasVoted(data.voters.some((v: any) => v === user._id || v?._id === user._id));
           setShowResults(data.voters.some((v: any) => v === user._id || v?._id === user._id));
         } else {
-          setHasVoted(false);
           setShowResults(false);
         }
       } catch (err) {
@@ -66,7 +63,6 @@ const PollView: React.FC = () => {
         optionId: poll.options[selectedOption]._id,
       });
       setPoll(updatedPoll);
-      setHasVoted(true);
       setShowResults(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to submit vote. Please try again.');
