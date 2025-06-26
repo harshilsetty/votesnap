@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-stuck arimport { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { HiSun, HiMoon } from 'react-icons/hi';
 
 const Navbar: React.FC = () => {
