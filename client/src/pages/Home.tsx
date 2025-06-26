@@ -10,9 +10,6 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const { isAuthenticated, user } = useAuth();
-  const [privatePollId, setPrivatePollId] = useState('');
-  const [privateAccessCode, setPrivateAccessCode] = useState('');
-  const [privateError, setPrivateError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,16 +28,6 @@ const Home: React.FC = () => {
 
     fetchPolls();
   }, []);
-
-  const handlePrivatePollAccess = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!privatePollId.trim() || !privateAccessCode.trim()) {
-      setPrivateError('Please enter both Poll ID and Access Code.');
-      return;
-    }
-    setPrivateError('');
-    navigate(`/poll/${privatePollId.trim()}?accessCode=${encodeURIComponent(privateAccessCode.trim())}`);
-  };
 
   // Filter out expired polls
   const activePolls = polls.filter(poll => {

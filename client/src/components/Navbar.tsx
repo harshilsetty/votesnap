@@ -17,11 +17,6 @@ const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const handlePrivatePollAccess = (e: React.FormEvent) => {
     e.preventDefault();
     if (!privatePollId.trim() || !privateAccessCode.trim()) {

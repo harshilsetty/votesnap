@@ -155,7 +155,7 @@ const CreatePoll: React.FC = () => {
               className={`peer pl-10 pr-3 py-3 block w-full rounded-md border bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 placeholder-transparent transition-all ${title && title.trim().length < 3 ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
               placeholder="Enter poll title"
               required
-              aria-invalid={title && title.trim().length < 3}
+              aria-invalid={!!(title && title.trim().length < 3)}
               aria-describedby="title-error"
             />
             <label
@@ -184,7 +184,7 @@ const CreatePoll: React.FC = () => {
                     className={`peer pl-10 pr-3 py-3 flex-1 rounded-md border bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 placeholder-transparent transition-all ${(option && option.trim().length === 0) ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
                     placeholder={`Option ${index + 1}`}
                     required
-                    aria-invalid={option && option.trim().length === 0}
+                    aria-invalid={!!(option && option.trim().length === 0)}
                   />
                   {options.length > 2 && (
                     <button
