@@ -2,17 +2,23 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 import authRoutes from './routes/auth';
 import pollRoutes from './routes/polls';
 
 // Load environment variables
+// Required: MONGODB_URI, JWT_SECRET, EMAIL_USER (Gmail), EMAIL_PASS (Gmail App Password)
 dotenv.config();
 
 const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Vite's default ports
+  origin: [
+    'https://hsvotesnap.netlify.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -22,10 +28,11 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(helmet());
 
 // Add security headers
 app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:5001 http://127.0.0.1:5001; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' https://hsvotesnap.netlify.app http://localhost:5001 http://127.0.0.1:5001; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
   next();
 });
 
