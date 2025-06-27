@@ -1,56 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { userApi } from '../services/api';
+import React from 'react';
 
 const AboutMe: React.FC = () => {
-  const { user } = useAuth();
-  const [name, setName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [profilePic, setProfilePic] = useState(user?.profilePic || '');
-  const [email] = useState(user?.email || '');
-  const [resetMode, setResetMode] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    try {
-      await userApi.updateProfile({ name, phone, profilePic });
-      setSuccess('Profile updated successfully!');
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (!currentPassword) {
-      setError('Please enter your current password');
-      return;
-    }
-    try {
-      await userApi.resetPassword(currentPassword, newPassword);
-      setSuccess('Password reset successfully!');
-      setNewPassword('');
-      setConfirmPassword('');
-      setCurrentPassword('');
-      setResetMode(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
-    }
-  };
-
   return (
     <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center">
       <h2 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">About VoteSnap</h2>

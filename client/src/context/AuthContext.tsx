@@ -8,6 +8,7 @@ interface User {
   name?: string;
   phone?: string;
   profilePic?: string;
+  createdAt?: string;
 }
 
 interface AuthContextType {
