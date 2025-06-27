@@ -81,7 +81,7 @@ router.get('/public', async (req, res) => {
 
     const polls = await Poll.find({ isPublic: true })
       .sort({ createdAt: -1 })
-      .populate('createdBy', 'email')
+      .populate('createdBy', 'name email role profilePic')
       .lean();
 
     console.log('Raw polls data:', JSON.stringify(polls, null, 2));
@@ -124,7 +124,7 @@ router.get('/user', auth, async (req: AuthRequest, res, next) => {
     console.log(`Fetching polls for user ${req.user._id}...`);
     const polls = await Poll.find({ createdBy: req.user._id })
       .sort({ createdAt: -1 })
-      .populate('createdBy', 'email')
+      .populate('createdBy', 'name email role profilePic')
       .lean();
 
     // Add status field to each poll
@@ -145,7 +145,7 @@ router.get('/user', auth, async (req: AuthRequest, res, next) => {
 router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
   try {
     let poll = await Poll.findById(req.params.id)
-      .populate('createdBy', 'email role');
+      .populate('createdBy', 'name email role profilePic');
     if (!poll) {
       return res.status(404).json({ message: 'Poll not found' });
     }
@@ -155,7 +155,7 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
     // If the user is the creator or an admin, populate voters with emails
     if ((userId && poll.createdBy && poll.createdBy._id && poll.createdBy._id.toString() === userId.toString()) || userRole === 'admin') {
       poll = await Poll.findById(req.params.id)
-        .populate('createdBy', 'email role')
+        .populate('createdBy', 'name email role profilePic')
         .populate('voters', 'email');
       return res.json(poll);
     }
@@ -227,7 +227,7 @@ router.get('/admin/dashboard', adminAuth, async (req, res) => {
     console.log('Fetching admin dashboard data...');
     const polls = await Poll.find()
       .sort({ createdAt: -1 })
-      .populate('createdBy', 'email')
+      .populate('createdBy', 'name email role profilePic')
       .lean();
 
     // Add status field to each poll

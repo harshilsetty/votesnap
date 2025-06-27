@@ -15,6 +15,7 @@ import MyPolls from './pages/MyPolls';
 import AboutMe from './pages/AboutMe';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -89,6 +90,7 @@ const App: React.FC = () => {
             <Route path="/about-me" element={<PrivateRoute><AboutMe /></PrivateRoute>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

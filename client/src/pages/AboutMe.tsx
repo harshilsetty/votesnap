@@ -52,50 +52,25 @@ const AboutMe: React.FC = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">About Me</h2>
-      <form onSubmit={handleSave} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-          <input type="email" value={email} disabled className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-          <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture URL</label>
-          <input type="text" value={profilePic} onChange={e => setProfilePic(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-          {profilePic && <img src={profilePic} alt="Profile" className="mt-2 w-24 h-24 rounded-full object-cover" />}
-        </div>
-        <button type="submit" className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
-      </form>
-      <div className="mt-6">
-        <button onClick={() => setResetMode(!resetMode)} className="text-blue-600 hover:underline">{resetMode ? 'Cancel' : 'Reset Password'}</button>
-        {resetMode && (
-          <form onSubmit={handleResetPassword} className="mt-4 space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
-              <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
-              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-            </div>
-            {error && <div className="text-red-500 text-sm">{error}</div>}
-            <button type="submit" className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700">Reset Password</button>
-          </form>
-        )}
+    <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center">
+      <h2 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">About VoteSnap</h2>
+      <p className="mb-6 text-lg text-gray-700 dark:text-gray-200">
+        <b>VoteSnap</b> is a modern, secure, and user-friendly online polling platform designed to make voting and poll management easy for everyone.
+      </p>
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <img src="https://avatars.githubusercontent.com/u/102648347?v=4" alt="Harshil Somisetty" className="w-20 h-20 rounded-full object-cover border-2 border-blue-400 shadow" />
+        <div className="text-lg font-semibold text-gray-900 dark:text-white">Harshil Somisetty</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Creator & Developer</div>
       </div>
-      {success && <div className="mt-4 text-green-600">{success}</div>}
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 text-white text-3xl font-bold shadow">🤖</span>
+        <div className="text-lg font-semibold text-gray-900 dark:text-white">CURSOR AI</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">AI Assistant & Co-Creator</div>
+      </div>
+      <div className="mt-8 text-base text-gray-600 dark:text-gray-300">
+        <p>Made with ❤️ by Harshil & CURSOR AI</p>
+        <p className="mt-2">For feedback or collaboration, contact: <a href="mailto:harshilsomisetty@gmail.com" className="text-blue-600 dark:text-blue-400 underline">harshilsomisetty@gmail.com</a></p>
+      </div>
     </div>
   );
 };

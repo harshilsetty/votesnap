@@ -73,9 +73,17 @@ const Home: React.FC = () => {
       {/* Greeting Section */}
       {isAuthenticated && user && (
         <div className="flex flex-col sm:flex-row items-center gap-4 p-4 sm:p-6 mb-6 bg-primary-50 dark:bg-primary-900/30 rounded-xl shadow animate-fade-in">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-2xl font-bold text-white">
-            {(user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase()}
-          </div>
+          {user.profilePic ? (
+            <img
+              src={user.profilePic}
+              alt="Profile"
+              className="w-14 h-14 rounded-full object-cover border-2 border-primary-300 dark:border-primary-700 shadow"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-2xl font-bold text-white">
+              {(user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase()}
+            </div>
+          )}
           <div className="text-center sm:text-left">
             <div className="text-lg sm:text-xl font-semibold text-primary-700 dark:text-primary-200">Hello, {user.name ? user.name.split(' ')[0] : user.email.split('@')[0]}!</div>
             <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Welcome back to VoteSnap{user.role === 'admin' ? ' (Admin)' : ''}.</div>

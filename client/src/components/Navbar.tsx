@@ -48,6 +48,17 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-blue-600 dark:text-blue-400">
+            {/* SVG Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-8 h-8 text-blue-600 dark:text-blue-400"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" className="fill-blue-100 dark:fill-blue-900" />
+              <path d="M7 13l3 3 7-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span className="hidden sm:inline">VoteSnap</span>
             <span className="sm:hidden">VS</span>
           </Link>
@@ -72,7 +83,9 @@ const Navbar: React.FC = () => {
           <div className="hidden sm:flex sm:items-center sm:gap-6">
             <div className="hidden sm:flex sm:items-center gap-x-4">
               <Link to="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</Link>
-              <Link to="/about-me" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About</Link>
+              {isAuthenticated && (
+                <Link to="/profile" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-3 py-1 rounded-md text-base font-medium">{user?.name || user?.email}</Link>
+              )}
               {isAuthenticated && (
                 <Link to="/mypolls" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">My Polls</Link>
               )}
@@ -103,10 +116,13 @@ const Navbar: React.FC = () => {
               >
                 {theme === 'dark' ? <HiSun className="w-5 h-5 text-yellow-400" /> : <HiMoon className="w-5 h-5 text-primary-900" />}
               </button>
+              {isAuthenticated && user?.role === 'admin' && (
+                <Link to="/admin" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-3 py-1 rounded-md text-base font-medium">Admin Dashboard</Link>
+              )}
             </div>
             {isAuthenticated ? (
               <>
-                <span className="text-gray-700 dark:text-gray-200 font-medium">{user?.email}</span>
+                <Link to="/about-me" className="ml-2 px-3 py-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none text-sm">About</Link>
                 <button
                   onClick={logout}
                   className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none text-sm"
@@ -127,7 +143,9 @@ const Navbar: React.FC = () => {
       {menuOpen && (
         <div className="sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-2 pt-2 pb-3 space-y-1 animate-fade-in" id="mobile-menu">
           <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/about-me" className="block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setMenuOpen(false)}>About</Link>
+          {isAuthenticated && (
+            <Link to="/profile" className="block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setMenuOpen(false)}>{user?.name || user?.email}</Link>
+          )}
           {isAuthenticated && (
             <Link to="/mypolls" className="block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setMenuOpen(false)}>My Polls</Link>
           )}
@@ -153,9 +171,12 @@ const Navbar: React.FC = () => {
           >
             {theme === 'dark' ? '🌞 Light Mode' : '🌙 Dark Mode'}
           </button>
+          {isAuthenticated && user?.role === 'admin' && (
+            <Link to="/admin" className="block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link>
+          )}
           {isAuthenticated ? (
             <>
-              <span className="block px-3 py-2 text-gray-700 dark:text-gray-200 font-medium">{user?.email}</span>
+              <Link to="/about-me" className="block px-3 py-2 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none text-base mt-1" onClick={() => setMenuOpen(false)}>About</Link>
               <button
                 onClick={() => { setMenuOpen(false); logout(); }}
                 className="block w-full text-left px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none text-base mt-1"

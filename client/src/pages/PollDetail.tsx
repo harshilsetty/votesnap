@@ -256,7 +256,7 @@ const PollDetail: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in px-2 sm:px-0">
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div className="card p-2 sm:p-6">
+      <div className="card p-2 sm:p-6 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 shadow-lg">
         <h1 className="text-xl sm:text-2xl font-bold mb-4">{poll.title}</h1>
         <div className="flex flex-col sm:flex-row items-center gap-2 mb-6">
           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${isExpired ? 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200' : 'bg-accent-100 text-accent-700 dark:bg-accent-900 dark:text-accent-200'}`}>{isExpired ? 'Expired' : 'Active'}</span>
@@ -268,10 +268,18 @@ const PollDetail: React.FC = () => {
         </div>
         {typeof poll.createdBy === 'object' && poll.createdBy.email && (
           <div className="mb-2 flex flex-col sm:flex-row items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <span className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
-              <UserCircleIcon className="w-5 h-5 text-primary-500 dark:text-primary-300" />
-            </span>
-            <span>Created by: <span className="font-medium">{poll.createdBy.email}</span></span>
+            {poll.createdBy.profilePic ? (
+              <img
+                src={poll.createdBy.profilePic}
+                alt="Creator Profile"
+                className="w-7 h-7 rounded-full object-cover border border-primary-300 dark:border-primary-700 shadow"
+              />
+            ) : (
+              <span className="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
+                <UserCircleIcon className="w-5 h-5 text-primary-500 dark:text-primary-300" />
+              </span>
+            )}
+            <span>Created by: <span className="font-medium">{poll.createdBy.name ? `${poll.createdBy.name} (${poll.createdBy.email})` : poll.createdBy.email}</span></span>
             {poll.createdBy.role && (
               <span className="ml-0 sm:ml-2 px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-xs text-gray-700 dark:text-gray-300">{poll.createdBy.role}</span>
             )}
@@ -312,15 +320,16 @@ const PollDetail: React.FC = () => {
                   </label>
                 </div>
               ))}
-              <button
-                onClick={handleVote}
-                disabled={!selectedOption || voting}
-                className={`btn btn-primary w-full text-lg font-semibold shadow-md transition-all duration-150 ${
-                  !selectedOption || voting ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {voting ? 'Submitting...' : 'Submit Vote'}
-              </button>
+              <div className="flex justify-center">
+                <button
+                  onClick={handleVote}
+                  disabled={!selectedOption || voting}
+                  className={`w-full max-w-xs py-2 px-4 text-base font-bold rounded-md shadow bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 text-white transition-all duration-200 border border-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400 dark:text-white ${(!selectedOption || voting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  style={{ letterSpacing: '0.5px' }}
+                >
+                  {voting ? 'Submitting...' : 'Submit Vote'}
+                </button>
+              </div>
             </div>
           ) : (poll.resultsDeclared || isCreator || isAdmin) ? (
             <div className="space-y-4">
@@ -360,15 +369,16 @@ const PollDetail: React.FC = () => {
           </div>
         )}
         {(isCreator || isAdmin) && !poll.resultsDeclared && (
-          <div className="mt-6 text-center">
+          <div className="mt-6 flex flex-col items-center">
             <button
-              className="btn btn-primary"
+              className="w-full max-w-xs py-2 px-4 text-base font-bold rounded-md shadow bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 text-white transition-all duration-200 border border-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400 dark:text-white mx-auto"
               onClick={handleDeclareResults}
               disabled={loading}
+              style={{ letterSpacing: '0.5px' }}
             >
               {loading ? 'Declaring...' : 'Declare Results'}
             </button>
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-gray-500 w-full text-center">
               Once declared, all voters will be able to see the results.<br />
               <span className="text-blue-500">You can declare results even after the poll has expired.</span>
             </p>
