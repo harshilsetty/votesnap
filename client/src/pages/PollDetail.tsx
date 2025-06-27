@@ -268,9 +268,9 @@ const PollDetail: React.FC = () => {
         </div>
         {typeof poll.createdBy === 'object' && poll.createdBy.email && (
           <div className="mb-2 flex flex-col sm:flex-row items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            {'profilePic' in poll.createdBy && poll.createdBy.profilePic ? (
+            {typeof poll.createdBy.profilePic === 'string' && poll.createdBy.profilePic.trim() !== '' ? (
               <img
-                src={poll.createdBy.profilePic}
+                src={String(poll.createdBy.profilePic)}
                 alt="Creator Profile"
                 className="w-7 h-7 rounded-full object-cover border border-primary-300 dark:border-primary-700 shadow"
               />
@@ -279,7 +279,7 @@ const PollDetail: React.FC = () => {
                 <UserCircleIcon className="w-5 h-5 text-primary-500 dark:text-primary-300" />
               </span>
             )}
-            <span>Created by: <span className="font-medium">{'name' in poll.createdBy && poll.createdBy.name ? `${poll.createdBy.name} (${poll.createdBy.email})` : poll.createdBy.email}</span></span>
+            <span>Created by: <span className="font-medium">{typeof poll.createdBy.name === 'string' && poll.createdBy.name ? `${poll.createdBy.name} (${poll.createdBy.email})` : poll.createdBy.email}</span></span>
             {poll.createdBy.role && (
               <span className="ml-0 sm:ml-2 px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-xs text-gray-700 dark:text-gray-300">{poll.createdBy.role}</span>
             )}
