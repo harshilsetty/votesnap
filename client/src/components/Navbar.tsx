@@ -129,13 +129,7 @@ const Navbar: React.FC = () => {
             <li>
               <Link
                 to="/access-poll"
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-gray-700/50'
-                  }`
-                }
+                className="px-4 py-2 rounded-xl font-medium transition-all duration-200 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-gray-700/50"
               >
                 Access Polls
               </Link>

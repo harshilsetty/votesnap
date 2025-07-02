@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pollApi, CreatePollData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { HiPencil, HiPlus, HiTrash, HiExclamationCircle, HiClock, HiEye, HiEyeOff } from 'react-icons/hi';
 
 const CreatePoll: React.FC = () => {
   const { isAuthenticated } = useAuth();
