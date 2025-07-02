@@ -102,12 +102,6 @@ const Home: React.FC = () => {
     return icons[category] || '📋';
   };
 
-  const getVotePercentage = (poll: Poll) => {
-    const totalVotes = poll.totalVotes;
-    const maxPossibleVotes = poll.options.length * 10; // Assume 10 votes per option as max
-    return Math.min((totalVotes / maxPossibleVotes) * 100, 100);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
