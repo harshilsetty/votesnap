@@ -16,6 +16,7 @@ import AboutMe from './pages/AboutMe';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import AccessPoll from './pages/AccessPoll';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -63,6 +64,7 @@ const App: React.FC = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/admin/signup" element={<AdminSignup />} />
             <Route path="/poll/:id" element={<PollDetail />} />
+            <Route path="/access-poll" element={<AccessPoll />} />
             <Route
               path="/create"
               element={
@@ -87,7 +89,7 @@ const App: React.FC = () => {
                 </PrivateRoute>
               }
             />
-            <Route path="/about-me" element={<PrivateRoute><AboutMe /></PrivateRoute>} />
+            <Route path="/about" element={<AboutMe />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { HiMail, HiLockClosed, HiExclamationCircle, HiCheckCircle } from 'react-icons/hi';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +15,7 @@ const Signup: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
 
   // Inline validation
   const emailValid = email.length > 0 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
@@ -27,7 +30,7 @@ const Signup: React.FC = () => {
     if (!nameValid || !emailValid || !passwordValid || !confirmPasswordValid) return;
     setIsLoading(true);
     try {
-      await register(email, password, name);
+      await register(email, password, name, phone);
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Failed to register. Please try again.');
@@ -164,6 +167,22 @@ const Signup: React.FC = () => {
               {touched.confirmPassword && !confirmPasswordValid && (
                 <span id="confirm-password-error" className="text-xs text-red-600 dark:text-red-400 mt-1 block">Passwords do not match</span>
               )}
+            </div>
+            {/* Phone Field */}
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Phone number (optional)
+              </label>
+              <PhoneInput
+                value={phone || '+91'}
+                onChange={setPhone}
+                defaultCountry="IN"
+                inputClassName="w-full h-12 px-3 py-3 rounded-md border bg-transparent dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500 border-gray-300 dark:border-gray-700 transition-all duration-200"
+                placeholder="Phone number (optional)"
+              />
             </div>
           </div>
           <div>

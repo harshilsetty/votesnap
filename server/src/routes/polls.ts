@@ -10,7 +10,7 @@ const router = express.Router();
 // Create a new poll
 router.post('/', auth, async (req: AuthRequest, res) => {
   try {
-    const { title, options, expiryHours, isPublic } = req.body;
+    const { title, options, expiryHours, isPublic, allowMultipleVotes, allowMultipleOptions, maxSelectableOptions } = req.body;
 
     // Validate required fields
     if (!title || !options || !expiryHours) {
@@ -51,6 +51,9 @@ router.post('/', auth, async (req: AuthRequest, res) => {
       createdBy: req.user._id,
       expiresAt,
       isPublic: isPublic !== false, // Default to public if not specified
+      allowMultipleVotes: !!allowMultipleVotes,
+      allowMultipleOptions: !!allowMultipleOptions,
+      maxSelectableOptions: allowMultipleOptions ? Math.max(2, Math.min(options.length, Number(maxSelectableOptions) || 2)) : undefined,
     });
 
     await poll.save();
@@ -178,13 +181,16 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
 // Vote on a poll
 router.post('/:id/vote', auth, async (req: AuthRequest, res) => {
   try {
-    const { optionId, accessCode } = req.body;
+    let { optionId, optionIds, accessCode } = req.body;
     const userId = req.user._id;
     const poll = await Poll.findById(req.params.id);
 
     if (!poll) {
       return res.status(404).json({ message: 'Poll not found' });
     }
+
+    // Debug log for allowMultipleVotes and allowMultipleOptions
+    console.log('Poll allowMultipleVotes:', poll.allowMultipleVotes, 'allowMultipleOptions:', poll.allowMultipleOptions);
 
     // Check if poll is expired
     if (poll.status === 'expired') {
@@ -198,23 +204,52 @@ router.post('/:id/vote', auth, async (req: AuthRequest, res) => {
       }
     }
 
-    // Prevent multiple votes by the same user
-    if (poll.voters && poll.voters.some((v: any) => v.toString() === userId.toString())) {
+    // Prevent multiple votes by the same user if not allowed
+    if (poll.allowMultipleVotes === false && poll.voters && poll.voters.some((v: any) => v.toString() === userId.toString())) {
       return res.status(400).json({ message: 'You have already voted in this poll.' });
     }
 
-    // Find and update the selected option
-    const option = poll.options.find((opt: any) => opt._id.toString() === optionId.toString());
-    if (!option) {
-      return res.status(400).json({ message: 'Invalid option' });
+    // Handle multiple options
+    if (poll.allowMultipleOptions) {
+      // Accept optionIds as array
+      if (!Array.isArray(optionIds) || optionIds.length === 0) {
+        return res.status(400).json({ message: 'Please select at least one option to vote.' });
+      }
+      // Prevent duplicate optionIds
+      optionIds = [...new Set(optionIds.map((id: any) => String(id)))];
+      // Enforce maxSelectableOptions
+      if (poll.maxSelectableOptions && optionIds.length > poll.maxSelectableOptions) {
+        return res.status(400).json({ message: `You can select up to ${poll.maxSelectableOptions} options.` });
+      }
+      // Validate all optionIds
+      for (const oid of optionIds) {
+        const option = poll.options.find((opt: any) => String(opt._id) === String(oid));
+        if (!option) {
+          return res.status(400).json({ message: 'Invalid option selected.' });
+        }
+        option.votes += 1;
+      }
+      poll.totalVotes = (poll.totalVotes || 0) + 1;
+      poll.voters = poll.voters || [];
+      poll.voters.push(userId);
+      await poll.save();
+      return res.json(poll);
+    } else {
+      // Single option voting
+      if (!optionId) {
+        return res.status(400).json({ message: 'Please select an option to vote.' });
+      }
+      const option = poll.options.find((opt: any) => String(opt._id) === String(optionId));
+      if (!option) {
+        return res.status(400).json({ message: 'Invalid option' });
+      }
+      option.votes += 1;
+      poll.totalVotes = (poll.totalVotes || 0) + 1;
+      poll.voters = poll.voters || [];
+      poll.voters.push(userId);
+      await poll.save();
+      return res.json(poll);
     }
-
-    option.votes += 1;
-    poll.voters = poll.voters || [];
-    poll.voters.push(userId);
-    await poll.save();
-
-    res.json(poll);
   } catch (error) {
     console.error('Error voting:', error);
     res.status(500).json({ message: 'Failed to submit vote' });

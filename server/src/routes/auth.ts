@@ -18,7 +18,7 @@ const TOKEN_EXPIRATION = '24h'; // Increased from 1h to 24h
 // Register a new user
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body as { email: string; password: string; name: string };
+    const { email, password, name, phone } = req.body as { email: string; password: string; name: string; phone?: string };
 
     // Validate input
     if (!email || !password || !name) {
@@ -40,6 +40,7 @@ router.post('/register', async (req, res) => {
       email,
       password,
       name,
+      phone,
       role: 'user'
     });
 
@@ -61,6 +62,7 @@ router.post('/register', async (req, res) => {
         id: user._id,
         email: user.email,
         name: user.name,
+        phone: user.phone,
         role: user.role
       }
     });

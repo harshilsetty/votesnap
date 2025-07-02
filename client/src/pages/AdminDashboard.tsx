@@ -203,6 +203,7 @@ const AdminDashboard: React.FC = () => {
               <div>Expires: {new Date(selectedPoll.expiresAt).toLocaleString()}</div>
               <div>Status: <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedPoll.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`}>{selectedPoll.status}</span></div>
               <div>Total Votes: {selectedPoll.options.reduce((sum, o) => sum + o.votes, 0)}</div>
+              <div>Created By: {typeof selectedPoll.createdBy === 'string' ? `User ID: ${selectedPoll.createdBy}` : `${selectedPoll.createdBy.email} (${selectedPoll.createdBy.role})`}</div>
               {!selectedPoll.isPublic && (
                 <div>Access Code: <span className="font-mono text-yellow-700 dark:text-yellow-200">{selectedPoll.accessCode}</span></div>
               )}
@@ -254,6 +255,7 @@ const AdminDashboard: React.FC = () => {
             <thead>
               <tr className="text-left border-b dark:border-gray-700">
                 <th className="pb-3 px-4">Title</th>
+                <th className="pb-3 px-4">Created By</th>
                 <th className="pb-3 px-4">Options</th>
                 <th className="pb-3 px-4">Votes</th>
                 <th className="pb-3 px-4">Created</th>
@@ -266,7 +268,7 @@ const AdminDashboard: React.FC = () => {
             <tbody>
               {filteredPolls.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-gray-400">
+                  <td colSpan={9} className="py-12 text-center text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-5xl">🗳️</span>
                       <span className="text-lg font-semibold">No polls found.</span>
@@ -277,6 +279,16 @@ const AdminDashboard: React.FC = () => {
               ) : filteredPolls.map((poll) => (
                 <tr key={poll._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-pointer" onClick={() => handleViewPoll(poll)}>
                   <td className="py-4 px-4 font-semibold">{poll.title}</td>
+                  <td className="py-4 px-4">
+                    {typeof poll.createdBy === 'string' ? (
+                      <span className="text-gray-500 dark:text-gray-400">User ID: {poll.createdBy}</span>
+                    ) : (
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900 dark:text-white">{poll.createdBy.email}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{poll.createdBy.role}</span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-4 px-4">{poll.options.length}</td>
                   <td className="py-4 px-4">{poll.options.reduce((sum, opt) => sum + opt.votes, 0)}</td>
                   <td className="py-4 px-4">{new Date(poll.createdAt).toLocaleDateString()}</td>

@@ -1,83 +1,111 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import pollApi from '../services/api';
+import { pollApi, CreatePollData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { HiPencil, HiPlus, HiTrash, HiExclamationCircle, HiClock, HiEye, HiEyeOff } from 'react-icons/hi';
 
 const CreatePoll: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [options, setOptions] = useState(['', '']);
-  const [expiryHours, setExpiryHours] = useState(24);
-  const [isPublic, setIsPublic] = useState(true);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [createdAccessCode, setCreatedAccessCode] = useState<string | null>(null);
-  const [createdPollId, setCreatedPollId] = useState<string | null>(null);
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<CreatePollData>({
+    title: '',
+    description: '',
+    category: 'general',
+    options: ['', ''],
+    expiryHours: 24,
+    isPublic: true,
+    tags: [],
+    allowMultipleVotes: false,
+    allowMultipleOptions: false,
+    maxSelectableOptions: 2,
+    showResultsBeforeVoting: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [newTag, setNewTag] = useState('');
+
+  const categories = [
+    { value: 'general', label: 'General', icon: '📊' },
+    { value: 'politics', label: 'Politics', icon: '🏛️' },
+    { value: 'technology', label: 'Technology', icon: '💻' },
+    { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
+    { value: 'sports', label: 'Sports', icon: '⚽' },
+    { value: 'education', label: 'Education', icon: '📚' },
+    { value: 'business', label: 'Business', icon: '💼' },
+    { value: 'health', label: 'Health', icon: '🏥' },
+    { value: 'other', label: 'Other', icon: '📋' },
+  ];
 
   const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
+    const newOptions = [...formData.options];
     newOptions[index] = value;
-    setOptions(newOptions);
+    setFormData({ ...formData, options: newOptions });
   };
 
   const addOption = () => {
-    if (options.length < 10) {
-      setOptions([...options, '']);
+    if (formData.options.length < 10) {
+      setFormData({ ...formData, options: [...formData.options, ''] });
     }
   };
 
   const removeOption = (index: number) => {
-    if (options.length > 2) {
-      const newOptions = options.filter((_, i) => i !== index);
-      setOptions(newOptions);
+    if (formData.options.length > 2) {
+      const newOptions = formData.options.filter((_, i) => i !== index);
+      setFormData({ ...formData, options: newOptions });
     }
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !formData.tags?.includes(newTag.trim()) && (formData.tags?.length || 0) < 5) {
+      setFormData({ 
+        ...formData, 
+        tags: [...(formData.tags || []), newTag.trim()] 
+      });
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData({ 
+      ...formData, 
+      tags: formData.tags?.filter(tag => tag !== tagToRemove) || [] 
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    // Validate title
-    if (title.trim().length < 3) {
-      setError('Title must be at least 3 characters long');
+    
+    if (!isAuthenticated) {
+      setError('Please log in to create a poll');
       return;
     }
 
-    // Validate options
-    const validOptions = options.filter(opt => opt.trim().length > 0);
-    if (validOptions.length < 2) {
-      setError('At least 2 options are required');
+    if (!formData.title.trim()) {
+      setError('Please enter a poll title');
       return;
     }
 
-    // Check for duplicate options
-    const uniqueOptions = new Set(validOptions.map(opt => opt.trim().toLowerCase()));
-    if (uniqueOptions.size !== validOptions.length) {
-      setError('Options must be unique');
+    if (formData.options.filter(opt => opt.trim()).length < 2) {
+      setError('Please enter at least 2 options');
       return;
     }
-
-    setIsLoading(true);
 
     try {
-      const poll = await pollApi.createPoll({
-        title: title.trim(),
-        options: validOptions.map(opt => opt.trim()),
-        expiryHours,
-        isPublic
-      });
-      if (!isPublic && poll.accessCode) {
-        setCreatedAccessCode(poll.accessCode);
-        setCreatedPollId(poll._id);
-      } else {
-        navigate(`/poll/${poll._id}`);
-      }
+      setLoading(true);
+      setError('');
+      
+      const pollData = {
+        ...formData,
+        options: formData.options.filter(opt => opt.trim()),
+        tags: formData.tags?.filter(tag => tag.trim()) || [],
+      };
+
+      const createdPoll = await pollApi.createPoll(pollData);
+      navigate(`/poll/${createdPoll._id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to create poll. Please try again.');
+      setError(err.message || 'Failed to create poll');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -96,173 +124,273 @@ const CreatePoll: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Create New Poll</h1>
-
-      {createdAccessCode && createdPollId && (
-        <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg text-center">
-          <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Private Poll Created!</h2>
-          <p className="text-yellow-700 dark:text-yellow-100 mb-2">
-            Share this access code with voters:
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Create New Poll
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Share your question with the world and get instant feedback
           </p>
-          <div className="text-2xl font-mono font-bold text-yellow-900 dark:text-yellow-100 mb-4">{createdAccessCode}</div>
-          <p className="text-yellow-700 dark:text-yellow-100 mb-2">
-            Or share this direct poll link:
-          </p>
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <input
-              type="text"
-              readOnly
-              value={`${window.location.origin}/poll/${createdPollId}?code=${createdAccessCode}`}
-              className="w-full max-w-xl px-2 py-1 rounded border border-yellow-400 bg-yellow-50 dark:bg-yellow-900/60 text-yellow-900 dark:text-yellow-100 font-mono text-sm"
-              onFocus={e => e.target.select()}
-            />
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/poll/${createdPollId}?code=${createdAccessCode}`);
-                alert('Poll link copied to clipboard!');
-              }}
-            >
-              Copy Link
-            </button>
-          </div>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(`/poll/${createdPollId}`)}
-          >
-            Go to Poll
-          </button>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="rounded-md bg-red-50 dark:bg-red-900 p-4 flex items-center gap-2">
-            <HiExclamationCircle className="text-red-500 dark:text-red-200 text-xl" />
-            <div className="text-sm text-red-700 dark:text-red-200">{error}</div>
-          </div>
-        )}
-        <div className="rounded-md shadow-sm bg-white/80 dark:bg-gray-800/80 p-6 space-y-6 border border-gray-200 dark:border-gray-700">
-          {/* Poll Title */}
-          <div className="relative">
-            <HiPencil className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg pointer-events-none" />
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={`peer pl-10 pr-3 py-3 block w-full rounded-md border bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 placeholder-transparent transition-all ${title && title.trim().length < 3 ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
-              placeholder="Enter poll title"
-              required
-              aria-invalid={!!(title && title.trim().length < 3)}
-              aria-describedby="title-error"
-            />
-            <label
-              htmlFor="title"
-              className={`absolute left-10 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 px-1 text-gray-500 dark:text-gray-400 pointer-events-none transition-all duration-200 peer-focus:-top-2 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:dark:text-blue-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:left-10 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 dark:peer-placeholder-shown:text-gray-400 ${title ? '-top-2 left-2 text-xs text-blue-600 dark:text-blue-400' : ''}`}
-            >
-              Poll Title
-            </label>
-            {title && title.trim().length < 3 && (
-              <span id="title-error" className="text-xs text-red-600 dark:text-red-400 mt-1 block">Title must be at least 3 characters</span>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-600 dark:text-red-400">{error}</p>
+              </div>
             )}
-          </div>
-          {/* Poll Options */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Options
-            </label>
-            <div className="space-y-3">
-              {options.map((option, index) => (
-                <div key={index} className="flex gap-2 items-center relative">
-                  <HiPlus className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 text-lg pointer-events-none" />
-                  <input
-                    type="text"
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    className={`peer pl-10 pr-3 py-3 flex-1 rounded-md border bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 placeholder-transparent transition-all ${(option && option.trim().length === 0) ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
-                    placeholder={`Option ${index + 1}`}
-                    required
-                    aria-invalid={!!(option && option.trim().length === 0)}
-                  />
-                  {options.length > 2 && (
-                    <button
-                      type="button"
-                      onClick={() => removeOption(index)}
-                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      aria-label="Remove option"
-                    >
-                      <HiTrash />
-                    </button>
-                  )}
-                </div>
-              ))}
+
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Poll Title *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="What's your question?"
+                maxLength={100}
+              />
             </div>
-            {options.length < 10 && (
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description (Optional)
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Add more context to your poll..."
+                rows={3}
+                maxLength={500}
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.icon} {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tags (Optional)
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Add a tag..."
+                  maxLength={20}
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+              {formData.tags && formData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                    >
+                      #{tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Options */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Poll Options *
+              </label>
+              <div className="space-y-3">
+                {formData.options.map((option, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder={`Option ${index + 1}`}
+                      maxLength={100}
+                    />
+                    {formData.options.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => removeOption(index)}
+                        className="px-3 py-3 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {formData.options.length < 10 && (
+                  <button
+                    type="button"
+                    onClick={addOption}
+                    className="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-blue-500 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    + Add Option
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Settings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Expiry */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Poll Duration
+                </label>
+                <select
+                  value={formData.expiryHours}
+                  onChange={(e) => setFormData({ ...formData, expiryHours: parseInt(e.target.value) })}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={1}>1 hour</option>
+                  <option value={6}>6 hours</option>
+                  <option value={12}>12 hours</option>
+                  <option value={24}>1 day</option>
+                  <option value={72}>3 days</option>
+                  <option value={168}>1 week</option>
+                  <option value={720}>1 month</option>
+                </select>
+              </div>
+
+              {/* Privacy */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Privacy Setting
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      checked={formData.isPublic}
+                      onChange={() => setFormData({ ...formData, isPublic: true })}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">🌐 Public - Anyone can vote</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      checked={!formData.isPublic}
+                      onChange={() => setFormData({ ...formData, isPublic: false })}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">🔒 Private - Access code required</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Options */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Advanced Options</h3>
+              <div className="space-y-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowMultipleVotes}
+                    onChange={(e) => setFormData({ ...formData, allowMultipleVotes: e.target.checked })}
+                    className="mr-3"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">Allow multiple votes per user</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowMultipleOptions}
+                    onChange={(e) => setFormData({ ...formData, allowMultipleOptions: e.target.checked })}
+                    className="mr-3"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">Allow users to select multiple options</span>
+                </label>
+                {formData.allowMultipleOptions && (
+                  <div className="flex items-center mt-2 ml-6">
+                    <label className="mr-2 text-gray-700 dark:text-gray-300">Max selectable options:</label>
+                    <input
+                      type="number"
+                      min={2}
+                      max={formData.options.length}
+                      value={formData.maxSelectableOptions || 2}
+                      onChange={e => setFormData({ ...formData, maxSelectableOptions: Math.max(2, Math.min(formData.options.length, Number(e.target.value))) })}
+                      className="w-20 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                )}
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.showResultsBeforeVoting}
+                    onChange={(e) => setFormData({ ...formData, showResultsBeforeVoting: e.target.checked })}
+                    className="mr-3"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">Show results before voting</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 type="button"
-                onClick={addOption}
-                className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => navigate('/')}
+                className="px-6 py-3 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <HiPlus className="mr-2" /> Add Option
+                Cancel
               </button>
-            )}
-          </div>
-          {/* Expiry Time */}
-          <div className="relative">
-            <HiClock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg pointer-events-none" />
-            <input
-              type="number"
-              id="expiry"
-              min={1}
-              max={168}
-              value={expiryHours}
-              onChange={(e) => setExpiryHours(Number(e.target.value))}
-              className="peer pl-10 pr-3 py-3 block w-full rounded-md border bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 placeholder-transparent transition-all border-gray-300 dark:border-gray-700"
-              placeholder="Expiry Time (hours)"
-              required
-            />
-            <label
-              htmlFor="expiry"
-              className={`absolute left-10 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 px-1 text-gray-500 dark:text-gray-400 pointer-events-none transition-all duration-200 peer-focus:-top-2 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:dark:text-blue-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:left-10 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 dark:peer-placeholder-shown:text-gray-400 ${expiryHours ? '-top-2 left-2 text-xs text-blue-600 dark:text-blue-400' : ''}`}
-            >
-              Expiry Time (hours)
-            </label>
-          </div>
-          {/* Public/Private Toggle */}
-          <div className="flex items-center gap-4 mt-2">
-            <span className="text-sm text-gray-700 dark:text-gray-300">Poll Visibility:</span>
-            <button
-              type="button"
-              onClick={() => setIsPublic(true)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-all ${isPublic ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'}`}
-            >
-              <HiEye className="text-lg" /> Public
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPublic(false)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-all ${!isPublic ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'}`}
-            >
-              <HiEyeOff className="text-lg" /> Private
-            </button>
-          </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {loading ? 'Creating...' : 'Create Poll'}
+              </button>
+            </div>
+          </form>
         </div>
-        <div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            {isLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              'Create Poll'
-            )}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

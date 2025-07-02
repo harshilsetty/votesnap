@@ -78,6 +78,8 @@ api.interceptors.response.use(
 export interface Poll {
   _id: string;
   title: string;
+  description?: string;
+  category?: string;
   options: {
     _id: string;
     text: string;
@@ -92,13 +94,25 @@ export interface Poll {
   voters: any[];
   totalVotes: number;
   resultsDeclared: boolean;
+  tags?: string[];
+  allowMultipleVotes?: boolean;
+  allowMultipleOptions?: boolean;
+  maxSelectableOptions?: number;
+  showResultsBeforeVoting?: boolean;
 }
 
 export interface CreatePollData {
   title: string;
+  description?: string;
+  category?: string;
   options: string[];
   expiryHours: number;
   isPublic: boolean;
+  tags?: string[];
+  allowMultipleVotes?: boolean;
+  allowMultipleOptions?: boolean;
+  maxSelectableOptions?: number;
+  showResultsBeforeVoting?: boolean;
 }
 
 export interface VoteData {
@@ -121,7 +135,7 @@ export const pollApi = {
   // Get all active polls
   getPolls: async (): Promise<Poll[]> => {
     try {
-      const response = await api.get('/polls');
+      const response = await api.get('/polls/public');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -270,9 +284,9 @@ export default pollApi;
 
 export const authApi = {
   // Register a new user
-  register: async (email: string, password: string, name: string) => {
+  register: async (email: string, password: string, name: string, phone?: string) => {
     try {
-      const response = await api.post('/auth/register', { email, password, name });
+      const response = await api.post('/auth/register', { email, password, name, phone });
       return response.data;
     } catch (error: any) {
       console.error('Error registering:', error);

@@ -27,7 +27,7 @@ const Login: React.FC = () => {
       if (user && user.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/profile');
+        navigate('/');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please try again.');

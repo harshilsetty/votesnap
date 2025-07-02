@@ -16,6 +16,9 @@ export interface IPoll extends mongoose.Document {
   allowedVoters: mongoose.Types.ObjectId[];
   voters: mongoose.Types.ObjectId[];
   resultsDeclared: boolean;
+  allowMultipleVotes?: boolean;
+  allowMultipleOptions?: boolean;
+  maxSelectableOptions?: number;
 }
 
 const pollSchema = new mongoose.Schema({
@@ -76,6 +79,14 @@ const pollSchema = new mongoose.Schema({
     default: []
   }],
   resultsDeclared: {
+    type: Boolean,
+    default: false,
+  },
+  allowMultipleVotes: {
+    type: Boolean,
+    default: false,
+  },
+  allowMultipleOptions: {
     type: Boolean,
     default: false,
   },
